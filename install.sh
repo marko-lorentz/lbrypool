@@ -162,7 +162,6 @@ if [[ ("${CONFMAP['UFW']}" == "y" || "${CONFMAP['UFW']}" == "Y" || "${CONFMAP['U
   sudo ufw --force enable
 fi
 
-
 # Phase 2: YIIMP ###############################################################
 clear
 output " Installing yiimp"
@@ -208,7 +207,7 @@ sudo cp -r "${HOME}"/yiimp/blocknotify/blocknotify /usr/bin
 sudo mkdir -p /etc/yiimp
 sudo mkdir -p "${HOME}"/backup/
 #fixing yiimp
-sed -i "s|ROOTDIR=/data/yiimp|ROOTDIR=/var|g" /usr/bin/yiimp
+sudo sed -i "s|ROOTDIR=/data/yiimp|ROOTDIR=/var/yiimp|g" /usr/bin/yiimp
 #fixing run.sh
 sudo rm -r /var/stratum/config/run.sh
 # shellcheck disable=SC2016
@@ -231,7 +230,7 @@ sudo [ -L /etc/localtime ] && sudo unlink /etc/localtime
 # update time zone
 sudo ln -sf /usr/share/zoneinfo/"${CONFMAP['TIME_ZONE']}" /etc/localtime
 sudo apt install -y ntpdate
-# write time to clock.
+# write time to clock if possible
 sudo hwclock -w
 
 # Phase 3: Web Server configuration ############################################
@@ -242,6 +241,7 @@ sudo mkdir -p /var/www/"${CONFMAP['SERVER_NAME']}"/html
 output "Creating webserver initial config file"
 output ""
 if [[ ("${CONFMAP['SUB_DOMAIN']}" == "y" || "${CONFMAP['SUB_DOMAIN']}" == "Y") ]]; then
+  # shellcheck disable=SC2016
   echo 'include /etc/nginx/blockuseragents.rules;
 	server {
 	if ($blockedagent) {
@@ -271,7 +271,7 @@ if [[ ("${CONFMAP['SUB_DOMAIN']}" == "y" || "${CONFMAP['SUB_DOMAIN']}" == "Y") ]
         error_log  /var/log/nginx/'"${CONFMAP['SERVER_NAME']}"'.app-error.log error;
     
         # allow larger file uploads and longer script runtimes
- 	client_body_buffer_size  50k;
+        client_body_buffer_size  50k;
         client_header_buffer_size 50k;
         client_max_body_size 50k;
         large_client_header_buffers 2 50k;
@@ -334,6 +334,7 @@ if [[ ("${CONFMAP['SUB_DOMAIN']}" == "y" || "${CONFMAP['SUB_DOMAIN']}" == "Y") ]
     sudo rm /etc/nginx/sites-available/"${CONFMAP['SERVER_NAME']}".conf
     sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
     # I am SSL Man!
+    # shellcheck disable=SC2016
     echo 'include /etc/nginx/blockuseragents.rules;
 	server {
 	if ($blockedagent) {
@@ -367,7 +368,7 @@ if [[ ("${CONFMAP['SUB_DOMAIN']}" == "y" || "${CONFMAP['SUB_DOMAIN']}" == "Y") ]
             error_log  /var/log/nginx/'"${CONFMAP['SERVER_NAME']}"'.app-error.log error;
         
             # allow larger file uploads and longer script runtimes
- 	client_body_buffer_size  50k;
+        client_body_buffer_size  50k;
         client_header_buffer_size 50k;
         client_max_body_size 50k;
         large_client_header_buffers 2 50k;
@@ -387,7 +388,7 @@ if [[ ("${CONFMAP['SUB_DOMAIN']}" == "y" || "${CONFMAP['SUB_DOMAIN']}" == "Y") ]
             add_header X-Content-Type-Options nosniff;
             add_header X-XSS-Protection "1; mode=block";
             add_header X-Robots-Tag none;
-            add_header Content-Security-Policy "frame-ancestors 'self'";
+            add_header Content-Security-Policy "frame-ancestors '"'"'self'"'"';
         
         location / {
         try_files $uri $uri/ /index.php?$args;
@@ -443,6 +444,7 @@ if [[ ("${CONFMAP['SUB_DOMAIN']}" == "y" || "${CONFMAP['SUB_DOMAIN']}" == "Y") ]
   sudo service nginx restart
   sudo service php7.4-fpm reload
 else
+  # shellcheck disable=SC2016
   echo 'include /etc/nginx/blockuseragents.rules;
 	server {
 	if ($blockedagent) {
@@ -535,6 +537,7 @@ else
     sudo rm /etc/nginx/sites-available/"${CONFMAP['SERVER_NAME']}".conf
     sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
     # I am SSL Man!
+    # shellcheck disable=SC2016
     echo 'include /etc/nginx/blockuseragents.rules;
 	server {
 	if ($blockedagent) {
@@ -588,7 +591,7 @@ else
             add_header X-Content-Type-Options nosniff;
             add_header X-XSS-Protection "1; mode=block";
             add_header X-Robots-Tag none;
-            add_header Content-Security-Policy "frame-ancestors 'self'";
+            add_header Content-Security-Policy "frame-ancestors '"'"'self'"'"'";
         
         location / {
         try_files $uri $uri/ /index.php?$args;
@@ -712,8 +715,8 @@ define('"'"'EXCH_YOBIT_SECRET'"'"', '"'"''"'"');
 
 output "Peforming the SQL import"
 output ""
-cd ~
-cd yiimp/sql
+cd ~ || exit
+cd yiimp/sql || exit
 # import sql dump
 sudo zcat 2016-04-03-yaamp.sql.gz | sudo mysql --defaults-group-suffix=host1
 # oh the humanity!
@@ -737,6 +740,7 @@ clear
 output "Generating a basic serverconfig.php"
 output ""
 # make config file
+# shellcheck disable=SC2016
 echo '
 <?php
 ini_set('"'"'date.timezone'"'"', '"'"'UTC'"'"');
@@ -814,6 +818,7 @@ $configAlgoNormCoef = array(
 ' | sudo -E tee /var/web/serverconfig.php >/dev/null 2>&1
 
 output "Adding tmux start file to ~/"
+# shellcheck disable=SC2016
 echo '
 #!/bin/bash
 LOG_DIR=/var/log
@@ -837,20 +842,20 @@ sudo chmod +x ~/pool-start.sh
 
 output "Updating stratum config files with database connection info."
 output ""
-cd /var/stratum/config
-sudo sed -i 's/password = tu8tu5/password = '${BLCKNOTIFYPASS}'/g' *.conf
-sudo sed -i 's/server = yaamp.com/server = '"${CONFMAP['SERVER_NAME']}"'/g' *.conf
-sudo sed -i 's/host = yaampdb/host = localhost/g' *.conf
-sudo sed -i 's/database = yaamp/database = yiimpfrontend/g' *.conf
-sudo sed -i 's/username = root/username = stratum/g' *.conf
-sudo sed -i 's/password = patofpaq/password = '${MYSQL_STRATUMPASSWD}'/g' *.conf
-cd ~
+cd /var/stratum/config || exit
+sudo sed -i 's/password = tu8tu5/password = '"${BLCKNOTIFYPASS}"'/g' ./*.conf
+sudo sed -i 's/server = yaamp.com/server = '"${CONFMAP['SERVER_NAME']}"'/g' ./*.conf
+sudo sed -i 's/host = yaampdb/host = localhost/g' ./*.conf
+sudo sed -i 's/database = yaamp/database = yiimpfrontend/g' ./*.conf
+sudo sed -i 's/username = root/username = stratum/g' ./*.conf
+sudo sed -i 's/password = patofpaq/password = '"${MYSQL_STRATUMPASSWD}"'/g' ./*.conf
+cd ~ || exit
 
-sudo rm -rf $HOME/yiimp
+sudo rm -rf "${HOME}"/yiimp
 sudo service nginx restart
 sudo service php7.3-fpm reload
-cd ~
-wget https://github.com/lbryio/lbrycrd/releases/download/v0.17.3.2/lbrycrd-linux-1732.zip
+cd ~ || exit
+wget https://github.com/lbryio/lbrycrd/releases/download/v0.17.3.3/lbrycrd-linux-1733.zip
 sudo unzip lbrycrd-linux-1732.zip -d /usr/bin
 
 lbrycrdd -daemon
@@ -860,11 +865,11 @@ lbrycrd-cli stop
 # Create config for Lbry
 echo && echo "Configuring Lbrycrd.conf"
 sleep 3
-rpcuser=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
-rpcpassword=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+RPCUSER=$(pwgen -cn 32 1)
+RPCPASSWORD=$(pwgen -cn 32 1)
 echo '
-rpcuser='$rpcuser'
-rpcpassword='$rpcpassword'
+rpcuser='"${RPCUSER}"'
+rpcpassword='"${RPCPASSWORD}"'
 rpcport=14390
 rpcthreads=24
 rpcallowip=127.0.0.1
@@ -880,12 +885,10 @@ sleep 3
 
 output "Final Directory permissions"
 output ""
-whoami=$(whoami)
-sudo usermod -aG www-data $whoami
+WHOAMI=$(whoami)
+sudo usermod -aG www-data "${WHOAMI}"
 sudo mkdir /root/backup/
-sudo mkdir /data
-sudo mkdir /data/yiimp
-sudo ln -s /var/web /data/yiimp/web
+sudo ln -s /var/web /var/yiimp/web
 sudo chown -R www-data:www-data /var/log
 sudo chown -R www-data:www-data /var/stratum
 sudo chown -R www-data:www-data /var/web
@@ -905,7 +908,7 @@ lbrycrdd -daemon
 clear
 output "Your mysql information is saved in ~/.my.cnf"
 output ""
-output "Please login to the admin panel at http://"${CONFMAP['SERVER_NAME']}"/site/"${CONFMAP['ADMIN_PANEL']}""
+output "Please login to the admin panel at http://${CONFMAP['SERVER_NAME']}/site/${CONFMAP['ADMIN_PANEL']}"
 output ""
-output "Your RPC username is ${rpcuser}"
-output "Your RPC Password is ${rpcpassword}"
+output "Your RPC username is ${RCPUSER}"
+output "Your RPC Password is ${RPCPASSWORD}"
