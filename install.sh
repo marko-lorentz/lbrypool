@@ -93,8 +93,8 @@ sudo apt autoremove -y
 clear
 output "Installing MySQL repository."
 output ""
-wget https://dev.mysql.com/get/mysql-apt-config_0.8.14-1_all.deb
-sudo dpkg -i ./mysql-apt-config_0.8.14-1_all.deb
+wget https://dev.mysql.com/get/mysql-apt-config_0.8.17-1_all.deb
+sudo dpkg -i ./mysql-apt-config_0.8.17-1_all.deb
 sudo apt update
 export DEBIAN_FRONTEND="noninteractive"
 output "Installing pre-requisite repositories."
