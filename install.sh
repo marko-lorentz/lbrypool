@@ -889,7 +889,6 @@ WHOAMI=$(whoami)
 sudo usermod -aG www-data "${WHOAMI}"
 sudo mkdir /root/backup/
 sudo ln -s /var/web /var/yiimp/web
-sudo chown -R www-data:www-data /var/log
 sudo chown -R www-data:www-data /var/stratum
 sudo chown -R www-data:www-data /var/web
 sudo chmod -R 775 /var/www/"${CONFMAP['SERVER_NAME']}"/html
@@ -910,5 +909,5 @@ output "Your mysql information is saved in ~/.my.cnf"
 output ""
 output "Please login to the admin panel at http://${CONFMAP['SERVER_NAME']}/site/${CONFMAP['ADMIN_PANEL']}"
 output ""
-output "Your RPC username is ${RCPUSER}"
+output "Your RPC username is ${RPCUSER}"
 output "Your RPC Password is ${RPCPASSWORD}"
