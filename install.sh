@@ -655,17 +655,19 @@ output "Now for the database fun!"
 MYSQL_ROOTPASSWD=$(pwgen -cn 20 1)
 MYSQL_PANELPASSWD=$(pwgen -cn 20 1)
 MYSQL_STRATUMPASSWD=$(pwgen -cn 20 1)
-MYSQL_PHPADMINPASSWD=$(pwgen -c -1 20)
+MYSQL_PHPADMINPASSWD=$(pwgen -cn 20 1)
 # create database
 Q1="CREATE DATABASE IF NOT EXISTS yiimpfrontend;"
-Q2="GRANT ALL ON *.* TO 'panel'@'localhost' IDENTIFIED BY '${MYSQL_PANELPASSWD}';"
-Q3="FLUSH PRIVILEGES;"
-SQL="${Q1}${Q2}${Q3}"
+Q2="CREATE USER 'panel'@'localhost' IDENTIFIED BY '${MYSQL_PANELPASSWD}';"
+Q3="GRANT ALL ON *.* TO 'panel'@'localhost';"
+Q4="FLUSH PRIVILEGES;"
+SQL="${Q1}${Q2}${Q3}${Q4}"
 sudo mysql -u root -p="" -e "$SQL"
 # create stratum user
-Q1="GRANT ALL ON *.* TO 'stratum'@'localhost' IDENTIFIED BY '${MYSQL_STRATUMPASSWD}';"
-Q2="FLUSH PRIVILEGES;"
-SQL="${Q1}${Q2}"
+Q1="CREATE USER 'stratum'@'localhost' IDENTIFIED BY '${MYSQL_STRATUMPASSWD}';"
+Q2="GRANT ALL ON *.* TO 'stratum'@'localhost';"
+Q3="FLUSH PRIVILEGES;"
+SQL="${Q1}${Q2}${Q3}"
 sudo mysql -u root -p="" -e "$SQL"
 
 #Create my.cnf
