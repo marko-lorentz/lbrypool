@@ -891,11 +891,14 @@ output ""
 WHOAMI=$(whoami)
 sudo usermod -aG www-data "${WHOAMI}"
 sudo mkdir /root/backup/
+sudo mkdir /var/yiimp
 sudo ln -s /var/web /var/yiimp/web
 sudo chown -R www-data:www-data /var/stratum
 sudo chown -R www-data:www-data /var/web
+sudo chown -R www-data:www-data /var/yiimp
 sudo chmod -R 775 /var/www/"${CONFMAP['SERVER_NAME']}"/html
 sudo chmod -R 775 /var/web
+sudo chmod -R 775 /var/yiimp
 sudo chmod -R 775 /var/stratum
 sudo chmod -R 775 /var/web/yaamp/runtime
 sudo chmod -R 775 /root/backup/
