@@ -858,9 +858,9 @@ sudo service nginx restart
 sudo service php7.3-fpm reload
 cd ~ || exit
 wget https://github.com/lbryio/lbrycrd/releases/download/v0.17.3.3/lbrycrd-linux-1733.zip
-sudo unzip lbrycrd-linux-1732.zip -d /usr/bin
+sudo unzip lbrycrd-linux-1733.zip -d /usr/bin
 
-lbrycrdd -daemon
+lbrycrdd -daemon -server
 sleep 3
 lbrycrd-cli stop
 
@@ -878,6 +878,7 @@ rpcallowip=127.0.0.1
 # onlynet=ipv4
 maxconnections=36
 daemon=1
+server=1
 deprecatedrpc=accounts
 gen=0
 alertnotify=echo %s | mail -s "LBRY Credits alert!" '"${CONFMAP['EMAIL']}"'
