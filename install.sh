@@ -908,7 +908,7 @@ sudo chmod a+w /var/web/yaamp/runtime
 sudo chmod a+w /var/log
 sudo chmod a+w /var/web/assets
 
-lbrycrdd -daemon
+lbrycrdd -daemon -server
 
 clear
 output "Your mysql information is saved in ~/.my.cnf"
